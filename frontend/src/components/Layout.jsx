@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import {
   Home as HomeIcon,
-  AddCircleOutline as AddIcon,
+  Add as AddIcon,
   Logout as LogoutIcon,
   Login as LoginIcon,
   Person as PersonIcon,
