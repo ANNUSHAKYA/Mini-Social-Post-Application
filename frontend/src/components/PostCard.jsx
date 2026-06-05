@@ -15,11 +15,9 @@ import {
   Collapse,
   Tooltip,
 } from '@mui/material';
-import {
-  Favorite as FavoriteIcon,
-  FavoriteBorder as FavoriteBorderIcon,
-  ChatBubbleOutline as CommentIcon,
-} from '@mui/icons-material';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import CommentIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 
 const PostCard = ({ post, onLike, onComment }) => {
   const { user } = useAuth();
