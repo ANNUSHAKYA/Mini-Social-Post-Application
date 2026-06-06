@@ -26,6 +26,12 @@ import {
   ChevronRight as RightIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import WhatsAppIcon from '@mui/icons-material/WhatsApp';
+import TelegramIcon from '@mui/icons-material/Telegram';
+import YouTubeIcon from '@mui/icons-material/YouTube';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import InstagramIcon from '@mui/icons-material/Instagram';
+import FacebookIcon from '@mui/icons-material/Facebook';
 
 const Home = () => {
   const { user } = useAuth();
@@ -35,6 +41,45 @@ const Home = () => {
   const [spinning, setSpinning] = useState(false);
   const [spinResult, setSpinResult] = useState(null);
   const [wheelRotation, setWheelRotation] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  const slides = [
+    {
+      type: 'buy',
+      title: 'Buy Referrals',
+      tag: 'TRENDING',
+      cashback: '50% Cashback ⭐',
+      description: '🚀 Boost Your Earnings with Smart Referrals',
+      subtext: '💰 Buy high-quality referrals to maximize your earnings.',
+      highlight: '📈 Increase your Leaderboard Rank Instantly',
+      buttonText: 'Buy Referral Now ➜',
+      action: () => alert('Redirecting to referral shop...'),
+    },
+    {
+      type: 'premium',
+      title: 'Premium Membership',
+      tag: 'Exclusive',
+      description: '💎 Unlock Bigger Rewards with Premium Access',
+      subtext: '💠 Exclusive perks and faster ranking awaits you.',
+      highlight: '👑 Upgrade to Premium and climb the leaderboard faster.',
+      buttonText: 'Premium Plus Membership ➜',
+      action: () => alert('Redirecting to premium upgrade page...'),
+    },
+    {
+      type: 'refer',
+      title: 'Refer to Friends',
+      tag: 'Boost',
+      description: '🤝 Invite & Get Rewards',
+      subtext: '🔗 Now you can send your referral link to anyone with a single click.',
+      highlight: '🏆 Every referral moves you up the leaderboard!',
+      buttonText: 'Share Your Refer Link ➜',
+      action: () => {
+        const inviteLink = `https://taskplanet.org/signup?ref=PLANET-${user ? user.username.toUpperCase() : 'GUEST'}`;
+        navigator.clipboard.writeText(inviteLink);
+        alert('Referral link copied to clipboard!');
+      },
+    },
+  ];
 
   // Fake Live Offerwall Activity Ticker
   const [tickerIndex, setTickerIndex] = useState(0);
@@ -327,110 +372,159 @@ const Home = () => {
           </Box>
         </Paper>
 
-        {/* Buy Referrals Card with Arrow Control Indicators */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2.5,
-            borderRadius: 5,
-            border: '2px solid #eff6ff',
-            bgcolor: '#fff',
-            position: 'relative',
-          }}
-        >
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1.5 }}>
-            <Box
-              sx={{
-                bgcolor: '#ffefe5',
-                color: '#ff5500',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 2,
-                fontWeight: 800,
-                fontSize: '0.7rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-              }}
-            >
-              🔥 TRENDING
-            </Box>
-            <Box
-              sx={{
-                border: '1px solid #ef4444',
-                color: '#ef4444',
-                px: 1.5,
-                py: 0.25,
-                borderRadius: 2,
-                fontWeight: 700,
-                fontSize: '0.7rem',
-              }}
-            >
-              50% Cashback ⭐
-            </Box>
-          </Box>
-          
-          <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b', fontSize: '1.1rem' }}>
-            Buy Referrals
-          </Typography>
-          <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5, mb: 1, fontSize: '0.85rem' }}>
-            🚀 Boost Your Earnings with Smart Referrals
-          </Typography>
-          <Typography variant="caption" color="primary" sx={{ fontWeight: 600, display: 'block' }}>
-            📈 Increase your Leaderboard Rank Instantly
-          </Typography>
-
-          <Box sx={{ display: 'flex', gap: 1, position: 'absolute', right: 20, top: '45%' }}>
-            <IconButton size="small" sx={{ border: '1px solid #e2e8f0' }}>
-              <LeftIcon fontSize="small" />
-            </IconButton>
-            <IconButton size="small" sx={{ border: '1px solid #e2e8f0' }}>
-              <RightIcon fontSize="small" />
-            </IconButton>
-          </Box>
-        </Paper>
-
-        {/* Refer to Friends Card */}
-        <Paper
-          elevation={0}
-          sx={{
-            p: 3,
-            borderRadius: 5,
-            bgcolor: '#fff',
-            border: '1px solid #f1f5f9',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1.5,
-          }}
-        >
-          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-            <Avatar sx={{ bgcolor: '#eff6ff', color: '#0062ff', width: 44, height: 44 }}>
-              🤝
-            </Avatar>
-            <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
-                Refer to Friends
-              </Typography>
-              <Typography variant="body2" color="textSecondary" sx={{ fontSize: '0.85rem' }}>
-                Invite & Get Rewards
-              </Typography>
-            </Box>
-          </Box>
-          <Button
-            variant="contained"
-            fullWidth
+        {/* Movable Carousel Card (Buy Referrals / Premium Membership / Refer friends) */}
+        <Box sx={{ width: '100%', position: 'relative' }}>
+          <Paper
+            elevation={0}
             sx={{
-              bgcolor: '#0062ff',
-              '&:hover': { bgcolor: '#0052d9' },
-              borderRadius: 3.5,
-              py: 1.25,
-              textTransform: 'none',
-              fontWeight: 800,
+              p: 2.5,
+              borderRadius: 5,
+              border: '2px solid #eff6ff',
+              bgcolor: '#fff',
+              position: 'relative',
+              minHeight: 180,
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
             }}
           >
-            Share Your Refer Link ➜
-          </Button>
-        </Paper>
+            {/* Header tags inside active slide */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+              <Box
+                sx={{
+                  bgcolor: '#ffefe5',
+                  color: '#ff5500',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  fontWeight: 800,
+                  fontSize: '0.7rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                }}
+              >
+                {slides[activeSlide].type === 'buy' ? '🔥 ' : slides[activeSlide].type === 'premium' ? '💎 ' : '🤝 '} 
+                {slides[activeSlide].tag.toUpperCase()}
+              </Box>
+              {slides[activeSlide].cashback && (
+                <Box
+                  sx={{
+                    border: '1px solid #ef4444',
+                    color: '#ef4444',
+                    px: 1.5,
+                    py: 0.25,
+                    borderRadius: 2,
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                  }}
+                >
+                  {slides[activeSlide].cashback}
+                </Box>
+              )}
+            </Box>
+
+            {/* Slide Body Details */}
+            <Box sx={{ my: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800, color: '#1e293b', fontSize: '1.1rem' }}>
+                {slides[activeSlide].title}
+              </Typography>
+              <Typography variant="body2" color="textSecondary" sx={{ mt: 0.5, fontSize: '0.85rem' }}>
+                {slides[activeSlide].description}
+              </Typography>
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mt: 0.5, fontSize: '0.75rem' }}>
+                {slides[activeSlide].subtext}
+              </Typography>
+              <Box
+                sx={{
+                  mt: 1,
+                  bgcolor: '#eff6ff',
+                  color: '#0062ff',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: 2,
+                  display: 'inline-block',
+                }}
+              >
+                <Typography variant="caption" sx={{ fontWeight: 700, fontSize: '0.75rem' }}>
+                  {slides[activeSlide].highlight}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Slide Action Button */}
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={slides[activeSlide].action}
+              sx={{
+                bgcolor: '#0062ff',
+                '&:hover': { bgcolor: '#0052d9' },
+                borderRadius: 3.5,
+                py: 1.25,
+                textTransform: 'none',
+                fontWeight: 800,
+                mt: 1.5,
+              }}
+            >
+              {slides[activeSlide].buttonText}
+            </Button>
+
+            {/* Carousel Side Arrows (Absolute overlay) */}
+            <IconButton
+              size="small"
+              onClick={() => setActiveSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1))}
+              sx={{
+                position: 'absolute',
+                left: -15,
+                top: '40%',
+                bgcolor: '#fff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                zIndex: 10,
+                '&:hover': { bgcolor: '#f8fafc' },
+              }}
+            >
+              <LeftIcon fontSize="small" />
+            </IconButton>
+
+            <IconButton
+              size="small"
+              onClick={() => setActiveSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))}
+              sx={{
+                position: 'absolute',
+                right: -15,
+                top: '40%',
+                bgcolor: '#fff',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                zIndex: 10,
+                '&:hover': { bgcolor: '#f8fafc' },
+              }}
+            >
+              <RightIcon fontSize="small" />
+            </IconButton>
+          </Paper>
+
+          {/* Dots Indicators below the card */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 1.5, mb: 1 }}>
+            {slides.map((_, idx) => (
+              <Box
+                key={idx}
+                onClick={() => setActiveSlide(idx)}
+                sx={{
+                  width: idx === activeSlide ? 16 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  bgcolor: idx === activeSlide ? '#0062ff' : '#cbd5e1',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
 
         {/* Earn Up to 10,000 Points/Month! Yellow Border Card */}
         <Paper
@@ -507,7 +601,7 @@ const Home = () => {
           </Button>
         </Paper>
 
-        {/* Connect With Us grid */}
+        {/* Connect With Us - Centered title and horizontal line of circle social buttons */}
         <Paper
           elevation={0}
           sx={{
@@ -516,48 +610,44 @@ const Home = () => {
             bgcolor: '#fff',
             border: '1px solid #f1f5f9',
             mb: 4,
+            textAlign: 'center',
           }}
         >
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 2.5, color: '#1e293b' }}>
             Connect With Us
           </Typography>
-          <Grid container spacing={1.5} sx={{ justifyContent: 'center' }}>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1.75, flexWrap: 'wrap' }}>
             {[
-              { label: 'WhatsApp', color: '#25D366', icon: '💬' },
-              { label: 'Telegram', color: '#0088cc', icon: '✈️' },
-              { label: 'YouTube', color: '#ff0000', icon: '📺' },
-              { label: 'Twitter/X', color: '#111111', icon: '🐦' },
-              { label: 'Instagram', color: '#C13584', icon: '📸' },
-              { label: 'Facebook', color: '#3b5998', icon: '👥' },
+              { label: 'WhatsApp', color: '#25D366', icon: <WhatsAppIcon fontSize="small" />, url: '#' },
+              { label: 'Telegram', color: '#0088cc', icon: <TelegramIcon fontSize="small" />, url: '#' },
+              { label: 'YouTube', color: '#ff0000', icon: <YouTubeIcon fontSize="small" />, url: '#' },
+              { label: 'Twitter/X', color: '#111111', icon: <TwitterIcon fontSize="small" />, url: '#' },
+              { label: 'Instagram', color: '#C13584', icon: <InstagramIcon fontSize="small" />, url: '#' },
+              { label: 'Facebook', color: '#3b5998', icon: <FacebookIcon fontSize="small" />, url: '#' },
             ].map((social, i) => (
-              <Grid item xs={4} key={i}>
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    borderColor: '#f1f5f9',
-                    color: '#1e293b',
-                    textTransform: 'none',
-                    fontWeight: 700,
-                    borderRadius: 3,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 0.5,
-                    py: 1.5,
-                    bgcolor: '#f8fafc',
-                    '&:hover': {
-                      bgcolor: '#f1f5f9',
-                      borderColor: social.color,
-                      color: social.color,
-                    },
-                  }}
-                >
-                  <Typography variant="h5" component="span">{social.icon}</Typography>
-                  <Typography variant="caption" sx={{ fontWeight: 700 }}>{social.label}</Typography>
-                </Button>
-              </Grid>
+              <IconButton
+                key={i}
+                href={social.url}
+                sx={{
+                  bgcolor: social.color,
+                  color: '#ffffff',
+                  width: 36,
+                  height: 36,
+                  p: 0,
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+                  '&:hover': {
+                    bgcolor: social.color,
+                    opacity: 0.85,
+                    transform: 'translateY(-2px)',
+                  },
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {social.icon}
+              </IconButton>
             ))}
-          </Grid>
+          </Box>
         </Paper>
 
       </Box>
