@@ -9,142 +9,309 @@ import {
   Avatar,
   Box,
   Container,
-  Button,
-  Tooltip,
   Paper,
   BottomNavigation,
   BottomNavigationAction,
+  Badge,
 } from '@mui/material';
 import {
   Home as HomeIcon,
-  Add as AddIcon,
-  Logout as LogoutIcon,
-  Login as LoginIcon,
-  Person as PersonIcon,
+  Assignment as TaskIcon,
+  VolumeUp as ReferIcon,
+  Public as SocialIcon,
+  EmojiEvents as LeaderboardIcon,
+  CardGiftcard as GiftIcon,
+  Notifications as BellIcon,
 } from '@mui/icons-material';
 
-const Layout = ({ children, onCreatePostClick }) => {
-  const { user, logout } = useAuth();
+const Layout = ({ children }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  // Active navigation tab index based on route path
+  const getNavValue = () => {
+    switch (location.pathname) {
+      case '/':
+        return 0;
+      case '/tasks':
+        return 1;
+      case '/refer':
+        return 2;
+      case '/social':
+        return 3;
+      case '/leaderboard':
+        return 4;
+      default:
+        return 0;
+    }
   };
 
-  // Active navigation tab index based on route
-  const getNavValue = () => {
-    if (location.pathname === '/') return 0;
-    if (location.pathname === '/create') return 1;
-    return -1;
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/':
+        return 'Home';
+      case '/tasks':
+        return 'Tasks';
+      case '/refer':
+        return 'Refer';
+      case '/social':
+        return 'Social';
+      case '/leaderboard':
+        return 'Leaderboard';
+      default:
+        return 'Home';
+    }
+  };
+
+  // Map Bottom Nav Action to path redirects
+  const handleNavChange = (newValue) => {
+    switch (newValue) {
+      case 0:
+        navigate('/');
+        break;
+      case 1:
+        navigate('/tasks');
+        break;
+      case 2:
+        navigate('/refer');
+        break;
+      case 3:
+        navigate('/social');
+        break;
+      case 4:
+        navigate('/leaderboard');
+        break;
+      default:
+        navigate('/');
+    }
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', bgcolor: '#f4f6f8' }}>
-      {/* Top Navbar */}
-      <AppBar position="sticky" sx={{ bgcolor: '#ffffff', color: '#1e293b', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-        <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-            <Typography
-              variant="h6"
-              noWrap
-              component="div"
-              onClick={() => navigate('/')}
+    <Box
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        bgcolor: '#f1f5f9', // TaskPlanet standard page light grey backdrop
+      }}
+    >
+      {/* Centered App Container wrapper to mirror screenshots mobile view ratio on desktop */}
+      <Box
+        sx={{
+          maxWidth: 600,
+          width: '100%',
+          mx: 'auto',
+          bgcolor: '#fafafa',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          boxShadow: { sm: '0 0 20px rgba(0,0,0,0.05)' },
+          position: 'relative',
+        }}
+      >
+        {/* Top Header Navbar */}
+        <AppBar
+          position="sticky"
+          elevation={0}
+          sx={{
+            bgcolor: '#ffffff',
+            color: '#1e293b',
+            borderBottom: '1px solid #f1f5f9',
+            top: 0,
+            zIndex: 1100,
+          }}
+        >
+          <Container maxWidth="sm">
+            <Toolbar
+              disableGutters
               sx={{
-                fontWeight: 800,
-                letterSpacing: '.1rem',
-                color: '#2563eb', // Indigo Blue accent
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
+                justifyContent: 'space-between',
+                minHeight: '56px !important',
+                px: 1,
               }}
             >
-              🚀 SocialPlanet
-            </Typography>
+              {/* Left Page Title */}
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 900,
+                  fontSize: '1.05rem',
+                  color: '#1e293b',
+                }}
+              >
+                {getPageTitle()}
+              </Typography>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {user ? (
-                <>
-                  <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#334155' }}>
-                      @{user.username}
-                    </Typography>
-                    <Avatar
-                      alt={user.username}
-                      src={user.avatar}
-                      sx={{ width: 36, height: 36, border: '2px solid #2563eb' }}
-                    />
-                  </Box>
-                  <Tooltip title="Logout">
-                    <IconButton onClick={handleLogout} color="error">
-                      <LogoutIcon />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              ) : (
-                <Button
-                  variant="contained"
-                  size="small"
-                  startIcon={<LoginIcon />}
-                  onClick={() => navigate('/login')}
+              {/* Right Side Info Widgets */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                
+                {/* Points Star Badge */}
+                <Box
                   sx={{
-                    bgcolor: '#2563eb',
-                    '&:hover': { bgcolor: '#1d4ed8' },
-                    textTransform: 'none',
-                    borderRadius: 2,
+                    bgcolor: '#fef3c7',
+                    border: '1px solid #fde68a',
+                    borderRadius: 4,
+                    px: 1.25,
+                    py: 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
                   }}
                 >
-                  Login
-                </Button>
-              )}
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 800,
+                      color: '#d97706',
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    {user?.points || 300}
+                  </Typography>
+                  <Box sx={{ display: 'flex', color: '#f59e0b', fontSize: '0.9rem' }}>⭐</Box>
+                </Box>
 
-      {/* Main Content Area */}
-      <Container maxWidth="lg" sx={{ mt: 3, mb: 10, flexGrow: 1 }}>
-        {children}
-      </Container>
+                {/* Wallet Balance Badge */}
+                <Box
+                  sx={{
+                    bgcolor: '#ecfdf5',
+                    border: '1px solid #d1fae5',
+                    borderRadius: 4,
+                    px: 1.25,
+                    py: 0.5,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: 800,
+                      color: '#059669',
+                      fontSize: '0.75rem',
+                    }}
+                  >
+                    ₹{(user?.wallet || 0.00).toFixed(2)}
+                  </Typography>
+                </Box>
 
-      {/* Bottom Navigation for Mobile Devices */}
-      {user && (
-        <Paper
+                {/* Gift Box Icon button */}
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    p: 0.5,
+                  }}
+                >
+                  <GiftIcon sx={{ fontSize: '1.1rem', color: '#64748b' }} />
+                </IconButton>
+
+                {/* Notification Bell Icon button */}
+                <IconButton
+                  size="small"
+                  sx={{
+                    bgcolor: '#f8fafc',
+                    border: '1px solid #e2e8f0',
+                    p: 0.5,
+                  }}
+                >
+                  <Badge variant="dot" color="success" overlap="circular">
+                    <BellIcon sx={{ fontSize: '1.1rem', color: '#64748b' }} />
+                  </Badge>
+                </IconButton>
+
+                {/* User Avatar with Green Active dot status indicator */}
+                <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+                  <Avatar
+                    src={user?.avatar || `https://api.dicebear.com/7.x/adventurer/svg?seed=guest`}
+                    onClick={() => navigate(user ? '/' : '/login')}
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      cursor: 'pointer',
+                      border: '1px solid #e2e8f0',
+                    }}
+                  />
+                  {user && (
+                    <Box
+                      sx={{
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        width: 8,
+                        height: 8,
+                        bgcolor: '#10b981',
+                        borderRadius: '50%',
+                        border: '1.5px solid #fff',
+                      }}
+                    />
+                  )}
+                </Box>
+
+              </Box>
+            </Toolbar>
+          </Container>
+        </AppBar>
+
+        {/* Main Content Viewport */}
+        <Box
+          component="main"
           sx={{
-            position: 'fixed',
+            flexGrow: 1,
+            px: 2,
+            py: 2,
+            pb: 10, // Margin bottom to clear fixed navigation bar
+            width: '100%',
+          }}
+        >
+          {children}
+        </Box>
+
+        {/* Bottom TaskPlanet Navigation Panel */}
+        <Paper
+          elevation={10}
+          sx={{
+            position: 'absolute',
             bottom: 0,
             left: 0,
             right: 0,
-            display: { xs: 'block', sm: 'none' },
             zIndex: 1000,
-            borderTop: '1px solid #e2e8f0',
+            borderTop: '1px solid #f1f5f9',
+            borderRadius: 0,
           }}
-          elevation={3}
         >
           <BottomNavigation
             value={getNavValue()}
-            onChange={(event, newValue) => {
-              if (newValue === 0) navigate('/');
-              if (newValue === 1) {
-                if (onCreatePostClick) {
-                  onCreatePostClick();
-                } else {
-                  navigate('/');
-                  setTimeout(() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }, 100);
-                }
-              }
+            onChange={(event, newValue) => handleNavChange(newValue)}
+            showLabels={false}
+            sx={{
+              bgcolor: '#0062ff', // TaskPlanet solid active blue bottom navigation
+              height: 56,
+              '& .MuiBottomNavigationAction-root': {
+                color: 'rgba(255, 255, 255, 0.7)',
+                minWidth: 'auto',
+                padding: '6px 0',
+                '&.Mui-selected': {
+                  color: '#ffffff',
+                  '& .MuiSvgIcon-root': {
+                    transform: 'scale(1.15)',
+                    color: '#ffffff',
+                  },
+                },
+              },
             }}
-            showLabels
           >
-            <BottomNavigationAction label="Feed" icon={<HomeIcon />} />
-            <BottomNavigationAction label="Create Post" icon={<AddIcon />} />
+            <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+            <BottomNavigationAction label="Tasks" icon={<TaskIcon />} />
+            <BottomNavigationAction label="Refer" icon={<ReferIcon />} />
+            <BottomNavigationAction label="Social" icon={<SocialIcon />} />
+            <BottomNavigationAction label="Leaderboard" icon={<LeaderboardIcon />} />
           </BottomNavigation>
         </Paper>
-      )}
+
+      </Box>
     </Box>
   );
 };

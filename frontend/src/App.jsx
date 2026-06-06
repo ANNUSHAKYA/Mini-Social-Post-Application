@@ -1,7 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import Home from './pages/Home';
+import Tasks from './pages/Tasks';
+import Refer from './pages/Refer';
 import Feed from './pages/Feed';
+import Leaderboard from './pages/Leaderboard';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import { createTheme, ThemeProvider } from '@mui/material';
@@ -10,9 +14,9 @@ import { createTheme, ThemeProvider } from '@mui/material';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2563eb', // Indigo Blue
-      light: '#60a5fa',
-      dark: '#1d4ed8',
+      main: '#0062ff', // Primary TaskPlanet Blue
+      light: '#3b82f6',
+      dark: '#0052d9',
     },
     secondary: {
       main: '#475569', // Slate
@@ -43,7 +47,7 @@ const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
         },
       },
     },
@@ -56,7 +60,11 @@ function App() {
       <AuthProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Feed />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/refer" element={<Refer />} />
+            <Route path="/social" element={<Feed />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
           </Routes>

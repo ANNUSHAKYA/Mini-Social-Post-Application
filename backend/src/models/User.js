@@ -31,6 +31,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    points: {
+      type: Number,
+      default: 300,
+    },
+    wallet: {
+      type: Number,
+      default: 0.00,
+    },
   },
   {
     timestamps: true,
