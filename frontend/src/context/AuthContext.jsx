@@ -82,8 +82,22 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const addPoints = async (amount) => {
+    if (!user) return { success: false };
+    try {
+      const res = await api.put('/auth/points', { amount });
+      const updatedUser = { ...user, points: res.data.points };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return { success: true, points: res.data.points };
+    } catch (error) {
+      console.error('Failed to update points', error);
+      return { success: false };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, addPoints }}>
       {children}
     </AuthContext.Provider>
   );

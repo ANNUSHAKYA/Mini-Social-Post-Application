@@ -34,7 +34,7 @@ import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 
 const Home = () => {
-  const { user } = useAuth();
+  const { user, addPoints } = useAuth();
   const [points, setPoints] = useState(user?.points || 300);
   const [wallet, setWallet] = useState(user?.wallet || 0.0);
   const [openSpin, setOpenSpin] = useState(false);
@@ -114,15 +114,19 @@ const Home = () => {
     const segments = [0, 50, 100, 200, 500, 1000];
     const segmentIndex = Math.floor(Math.random() * segments.length);
     const winPoints = segments[segmentIndex];
-    const degrees = 1800 + segmentIndex * (360 / segments.length);
+    // Rotate 5 times + segment offset
+    const degrees = 1800 + (360 - segmentIndex * (360 / segments.length));
 
     setWheelRotation(degrees);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       setSpinning(false);
       setSpinResult(winPoints);
       setPoints((prev) => prev + winPoints);
-    }, 3000);
+      if (user) {
+        await addPoints(winPoints);
+      }
+    }, 3500);
   };
 
   return (
@@ -584,8 +588,11 @@ const Home = () => {
           <Button
             variant="contained"
             fullWidth
-            onClick={() => {
+            onClick={async () => {
               setPoints((p) => p + 300);
+              if (user) {
+                await addPoints(300);
+              }
               alert('300 Points claimed successfully! ⭐');
             }}
             sx={{
@@ -670,53 +677,102 @@ const Home = () => {
             <CloseIcon />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ overflow: 'visible' }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, py: 2 }}>
             <Typography variant="body2" color="textSecondary">
-              Spin the wheel to win bonus coins or referrals instantly!
+              Tap the wheel or click SPIN to win bonus coins instantly!
             </Typography>
 
-            {/* Spinner Wheel representation */}
-            <Box
-              sx={{
-                width: 200,
-                height: 200,
-                position: 'relative',
-                transition: spinning ? 'transform 3s cubic-bezier(0.1, 0.8, 0.3, 1)' : 'none',
-                transform: `rotate(${wheelRotation}deg)`,
-              }}
-            >
-              <svg width="200" height="200" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="#f8fafc" stroke="#334155" strokeWidth="2" />
-                {/* Segments */}
-                <path d="M 50 50 L 50 5 A 45 45 0 0 1 95 50 Z" fill="#f59e0b" />
-                <path d="M 50 50 L 95 50 A 45 45 0 0 1 72.5 89 Z" fill="#ef4444" />
-                <path d="M 50 50 L 72.5 89 A 45 45 0 0 1 27.5 89 Z" fill="#10b981" />
-                <path d="M 50 50 L 27.5 89 A 45 45 0 0 1 5 50 Z" fill="#3b82f6" />
-                <path d="M 50 50 L 5 50 A 45 45 0 0 1 50 5 Z" fill="#a855f7" />
+            {/* Inline keyframes styling for flashing lights and pointer wiggling */}
+            <style>{`
+              @keyframes pointer-wiggle {
+                0%, 100% { transform: rotate(0deg); }
+                25% { transform: rotate(-12deg); }
+                75% { transform: rotate(12deg); }
+              }
+              @keyframes light-blink {
+                0%, 100% { opacity: 0.3; }
+                50% { opacity: 1; }
+              }
+            `}</style>
 
-                {/* Texts in segments */}
-                <text x="65" y="30" fill="#fff" fontSize="5" fontWeight="bold" transform="rotate(25 65 30)">+50</text>
-                <text x="75" y="65" fill="#fff" fontSize="5" fontWeight="bold" transform="rotate(70 75 65)">+100</text>
-                <text x="50" y="80" fill="#fff" fontSize="5" fontWeight="bold">+200</text>
-                <text x="20" y="65" fill="#fff" fontSize="5" fontWeight="bold" transform="rotate(-70 20 65)">+500</text>
-                <text x="25" y="30" fill="#fff" fontSize="5" fontWeight="bold" transform="rotate(-25 25 30)">+1000</text>
-                
-                <circle cx="50" cy="50" r="8" fill="#fff" stroke="#1e293b" strokeWidth="2" />
-              </svg>
-              {/* Pointer indicator */}
+            {/* Spinner Wheel representation */}
+            <Box sx={{ position: 'relative', width: 220, height: 220, mx: 'auto', mt: 1 }}>
+              {/* Wiggling Pointer Arrow */}
               <Box
                 sx={{
                   position: 'absolute',
-                  top: -10,
-                  left: 'calc(50% - 10px)',
-                  width: 20,
-                  height: 20,
-                  transform: 'rotate(180deg)',
-                  zIndex: 2,
+                  top: -8,
+                  left: 'calc(50% - 12px)',
+                  width: 24,
+                  height: 24,
+                  zIndex: 10,
+                  animation: spinning ? 'pointer-wiggle 0.15s infinite ease-in-out' : 'none',
+                  transformOrigin: 'top center',
                 }}
               >
-                📐
+                <svg width="24" height="24" viewBox="0 0 24 24">
+                  <polygon points="12,24 2,4 22,4" fill="#ef4444" stroke="#ffffff" strokeWidth="2" />
+                </svg>
+              </Box>
+
+              {/* Spinning Outer Wheel */}
+              <Box
+                onClick={handleSpinWheel}
+                sx={{
+                  width: 220,
+                  height: 220,
+                  cursor: spinning ? 'default' : 'pointer',
+                  transition: spinning ? 'transform 3.5s cubic-bezier(0.1, 0.8, 0.2, 1)' : 'none',
+                  transform: `rotate(${wheelRotation}deg)`,
+                  transformOrigin: 'center center',
+                  filter: 'drop-shadow(0 8px 16px rgba(0,0,0,0.15))',
+                }}
+              >
+                {/* SVG Wheel */}
+                <svg width="220" height="220" viewBox="0 0 100 100">
+                  {/* Outer Golden Border */}
+                  <circle cx="50" cy="50" r="48" fill="#1e293b" stroke="#fbbf24" strokeWidth="2" />
+                  
+                  {/* Slices (Gradients / Colors) */}
+                  <path d="M 50 50 L 50 4 A 46 46 0 0 1 93.8 36.4 Z" fill="#fbbf24" /> {/* Yellow segment */}
+                  <path d="M 50 50 L 93.8 36.4 A 46 46 0 0 1 77 87.2 Z" fill="#ef4444" /> {/* Red segment */}
+                  <path d="M 50 50 L 77 87.2 A 46 46 0 0 1 23 87.2 Z" fill="#10b981" /> {/* Green segment */}
+                  <path d="M 50 50 L 23 87.2 A 46 46 0 0 1 6.2 36.4 Z" fill="#3b82f6" /> {/* Blue segment */}
+                  <path d="M 50 50 L 6.2 36.4 A 46 46 0 0 1 50 4 Z" fill="#8b5cf6" /> {/* Purple segment */}
+
+                  {/* Point Labels Text */}
+                  <text x="63" y="22" fill="#1e293b" fontSize="5" fontWeight="900" transform="rotate(36 63 22)">+50</text>
+                  <text x="74" y="60" fill="#ffffff" fontSize="5" fontWeight="900" transform="rotate(108 74 60)">+100</text>
+                  <text x="50" y="80" fill="#ffffff" fontSize="5" fontWeight="900" textAnchor="middle">+200</text>
+                  <text x="26" y="60" fill="#ffffff" fontSize="5" fontWeight="900" transform="rotate(-108 26 60)">+500</text>
+                  <text x="37" y="22" fill="#ffffff" fontSize="5" fontWeight="900" transform="rotate(-36 37 22)">+1000</text>
+
+                  {/* Glowing Outer Lights */}
+                  {[0, 36, 72, 108, 144, 180, 216, 252, 288, 324].map((deg, index) => {
+                    const rad = (deg * Math.PI) / 180;
+                    const cx = 50 + 48 * Math.sin(rad);
+                    const cy = 50 - 48 * Math.cos(rad);
+                    return (
+                      <circle
+                        key={index}
+                        cx={cx}
+                        cy={cy}
+                        r="1.5"
+                        fill="#ffffff"
+                        style={{
+                          animation: 'light-blink 0.6s infinite',
+                          animationDelay: `${index * 0.15}s`,
+                        }}
+                      />
+                    );
+                  })}
+
+                  {/* Shiny Center Pin Ring */}
+                  <circle cx="50" cy="50" r="12" fill="#1e293b" stroke="#ffffff" strokeWidth="1.5" />
+                  <circle cx="50" cy="50" r="9" fill="#fbbf24" />
+                  <text x="50" y="52" fill="#1e293b" fontSize="4.5" fontWeight="900" textAnchor="middle">SPIN</text>
+                </svg>
               </Box>
             </Box>
 
@@ -730,15 +786,16 @@ const Home = () => {
                 borderRadius: 4,
                 textTransform: 'none',
                 fontWeight: 800,
-                px: 5,
+                px: 6,
                 py: 1.25,
+                mt: 1,
               }}
             >
               {spinning ? 'Spinning...' : 'SPIN'}
             </Button>
 
             {spinResult !== null && (
-              <Typography variant="h6" sx={{ fontWeight: 800, color: '#10b981', mt: 1 }}>
+              <Typography variant="h6" sx={{ fontWeight: 900, color: '#10b981', mt: 1 }}>
                 🎉 You won +{spinResult} Points!
               </Typography>
             )}
