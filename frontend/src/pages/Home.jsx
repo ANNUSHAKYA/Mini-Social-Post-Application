@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import {
@@ -35,6 +36,7 @@ import FacebookIcon from '@mui/icons-material/Facebook';
 
 const Home = () => {
   const { user, addPoints } = useAuth();
+  const navigate = useNavigate();
   const [points, setPoints] = useState(user?.points || 300);
   const [wallet, setWallet] = useState(user?.wallet || 0.0);
   const [openSpin, setOpenSpin] = useState(false);
@@ -556,6 +558,7 @@ const Home = () => {
           </Typography>
           <Button
             variant="contained"
+            onClick={() => navigate('/tasks')}
             sx={{
               bgcolor: '#f59e0b',
               '&:hover': { bgcolor: '#d97706' },

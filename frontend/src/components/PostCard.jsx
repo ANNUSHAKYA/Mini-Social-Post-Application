@@ -14,16 +14,25 @@ import {
   Button,
   Collapse,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import CommentIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
+import CloseIcon from '@mui/icons-material/Close';
 
 const PostCard = ({ post, onLike, onComment }) => {
   const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [openLikesDialog, setOpenLikesDialog] = useState(false);
 
   const isLiked = user ? post.likes.some((like) => like.user === user._id) : false;
 
@@ -129,24 +138,36 @@ const PostCard = ({ post, onLike, onComment }) => {
 
       {/* Action Buttons */}
       <CardActions sx={{ px: 2, py: 1, justifyContent: 'flex-start', gap: 2 }}>
-        <Tooltip title={getLikesTooltip()} placement="top" arrow>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              onClick={handleLikeClick}
-              color={isLiked ? 'error' : 'default'}
-              size="medium"
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <IconButton
+            onClick={handleLikeClick}
+            color={isLiked ? 'error' : 'default'}
+            size="medium"
+            sx={{
+              transition: 'transform 0.2s',
+              '&:active': { transform: 'scale(1.3)' },
+            }}
+          >
+            {isLiked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+          </IconButton>
+          <Tooltip title={getLikesTooltip()} placement="top" arrow>
+            <Typography
+              variant="body2"
+              onClick={() => post.likes.length > 0 && setOpenLikesDialog(true)}
               sx={{
-                transition: 'transform 0.2s',
-                '&:active': { transform: 'scale(1.3)' },
+                fontWeight: 600,
+                color: isLiked ? '#ef4444' : '#64748b',
+                ml: 0.5,
+                cursor: post.likes.length > 0 ? 'pointer' : 'default',
+                '&:hover': {
+                  textDecoration: post.likes.length > 0 ? 'underline' : 'none',
+                },
               }}
             >
-              {isLiked ? <FavoriteIcon /> : <FavoriteBorderIcon />}
-            </IconButton>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: isLiked ? '#ef4444' : '#64748b', ml: 0.5 }}>
               {post.likes.length}
             </Typography>
-          </Box>
-        </Tooltip>
+          </Tooltip>
+        </Box>
 
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <IconButton onClick={() => setShowComments(!showComments)} size="medium" color="default">
@@ -253,6 +274,42 @@ const PostCard = ({ post, onLike, onComment }) => {
           )}
         </CardContent>
       </Collapse>
+
+      {/* Liked Users Modal Popup */}
+      <Dialog
+        open={openLikesDialog}
+        onClose={() => setOpenLikesDialog(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: { borderRadius: 4, p: 1 }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>Liked by</Typography>
+          <IconButton onClick={() => setOpenLikesDialog(false)} size="small">
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 0, maxHeight: 300 }}>
+          <List disablePadding>
+            {post.likes.map((likeUser) => (
+              <ListItem key={likeUser.user} sx={{ px: 3, py: 1.5 }}>
+                <ListItemAvatar>
+                  <Avatar src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${likeUser.username}`} />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, color: '#1e293b' }}>
+                      @{likeUser.username}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

@@ -115,9 +115,25 @@ const updatePoints = async (req, res) => {
   }
 };
 
+// @desc    Get top users sorted by points
+// @route   GET /api/auth/leaderboard
+// @access  Public
+const getLeaderboard = async (req, res) => {
+  try {
+    const topUsers = await User.find()
+      .select('username points avatar')
+      .sort({ points: -1 })
+      .limit(10);
+    res.json(topUsers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   updatePoints,
+  getLeaderboard,
 };

@@ -20,8 +20,7 @@ import {
 } from '@mui/icons-material';
 
 const Tasks = () => {
-  const { user } = useAuth();
-  const [points, setPoints] = useState(user?.points || 300);
+  const { user, addPoints } = useAuth();
   const [tasks, setTasks] = useState([
     { id: 1, title: 'Daily Login Reward', reward: 50, completed: false, description: 'Login to the app every day to claim bonus points.' },
     { id: 2, title: 'Install TaskPlanet Mobile App', reward: 300, completed: false, description: 'Download and register on the TaskPlanet mobile app.' },
@@ -29,12 +28,20 @@ const Tasks = () => {
     { id: 4, title: 'Solve Math Quiz Challenge', reward: 100, completed: false, description: 'Solve 10 simple questions within 2 minutes.' },
   ]);
 
-  const handleClaim = (taskId, reward) => {
+  const handleClaim = async (taskId, reward) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === taskId ? { ...t, completed: true } : t))
     );
-    setPoints((p) => p + reward);
-    alert(`Task completed! You claimed +${reward} Points! ⭐`);
+    if (user) {
+      const res = await addPoints(reward);
+      if (res.success) {
+        alert(`Task completed! You claimed +${reward} Points! ⭐`);
+      } else {
+        alert('Could not update points in the database.');
+      }
+    } else {
+      alert(`Task completed! (Guest Mode) You claimed +${reward} Points! ⭐`);
+    }
   };
 
   return (
